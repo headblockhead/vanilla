@@ -1,5 +1,4 @@
 { stdenv
-, lib
 , qtbase
 , wrapQtAppsHook
 , cmake
@@ -9,9 +8,9 @@
 , ffmpeg
 , dhclient
 , libnl
-, autoPatchelfHook
 }:
-stdenv.mkDerivation rec {
+
+stdenv.mkDerivation {
   version = "0.0.0";
   name = "vanilla";
   src = ./.;
@@ -26,12 +25,11 @@ stdenv.mkDerivation rec {
     ffmpeg
     dhclient
     libnl
-    autoPatchelfHook
   ];
 
   patchPhase = ''
     cp -r $src/ ./
-    cp $src/lib/hostap/conf/wpa_supplicant.config ./lib/hostap/wpa_supplicant/.config
+    cp ./lib/hostap/conf/wpa_supplicant.config ./lib/hostap/wpa_supplicant/.config
   '';
 
   configurePhase = ''
@@ -51,9 +49,8 @@ stdenv.mkDerivation rec {
     cp -r ../lib/hostap/wpa_supplicant/*.so $out/lib
   '';
 
-  fixupPhase =
-    ''
-      patchelf --add-needed ../lib/libwpa_client.so ./bin/*
-      wrapQtAppsHook $out
-    '';
+  fixupPhase = ''
+    patchelf --add-needed ../lib/libwpa_client.so ./bin/*
+    wrapQtAppsHook $out
+  '';
 }
