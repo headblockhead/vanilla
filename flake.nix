@@ -27,10 +27,6 @@
           default = pkgsFor.${system}.qt6Packages.callPackage ./default.nix {
             dhclient = dhcpkgs.${system}.pkgs.dhcp.override { withClient = true; };
           };
-          # Cross-build for aarch64-linux - currently failing due to a bug in qt6Packages
-          vanilla-cross-aarch64-linux = pkgsFor.${system}.pkgsCross.aarch64-multiplatform.qt6Packages.callPackage ./default.nix {
-            dhclient = dhcpkgs.${system}.pkgs.pkgsCross.aarch64-multiplatform.dhcp.override { withClient = true; };
-          };
         });
     };
 }
