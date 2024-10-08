@@ -2,27 +2,36 @@
   description = "A software clone of the Wii U gamepad for Linux";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
-    dhclient.url = "github:NixOS/nixpkgs/8d34cf8e7dfd8f00357afffe3597bc3b209edf8e";
+    dhclient_nixpkgs.url = "github:NixOS/nixpkgs/8d34cf8e7dfd8f00357afffe3597bc3b209edf8e";
   };
-  outputs = { self, nixpkgs, dhclient }:
+  outputs = { self, nixpkgs, dhclient_nixpkgs }:
     let
-      pkgs = import nixpkgs {
-        system = "x86_64-linux";
-      };
-      dhcpkgs = import dhclient {
-        config.permittedInsecurePackages = [
-          "dhcp-4.4.3-P1"
-        ];
-        system = "x86_64-linux";
-      };
-      vanilla = pkgs.qt6Packages.callPackage ./default.nix {
-        dhclient = dhcpkgs.dhcp.override { withClient = true; };
-      };
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+      pkgsFor = nixpkgs.legacyPackages;
     in
-    {
-      packages.x86_64-linux.default = vanilla;
-      devShells.x86_64-linux.default = pkgs.mkShell {
-        packages = [ vanilla ];
-      };
+    rec {
+      # Complicated garbage to get dhclient from an old version of nixpkgs.
+      dhcpkgs = forAllSystems
+        (system: {
+          pkgs = import dhclient_nixpkgs {
+            config.permittedInsecurePackages = [
+              "dhcp-4.4.3-P1" # yes, I love old EOL software
+            ];
+            system = system;
+          };
+        });
+      packages = forAllSystems
+        (system: {
+          # Build for the host system
+          default = pkgsFor.${system}.qt6Packages.callPackage ./default.nix {
+            dhclient = dhcpkgs.${system}.pkgs.dhcp.override { withClient = true; };
+          };
+          # Cross-build for aarch64-linux - currently failing due to a bug in qt6Packages
+          vanilla-cross-aarch64-linux = pkgsFor.${system}.pkgsCross.aarch64-multiplatform.qt6Packages.callPackage ./default.nix {
+            dhclient = dhcpkgs.${system}.pkgs.pkgsCross.aarch64-multiplatform.dhcp.override { withClient = true; };
+          };
+        });
     };
 }
+

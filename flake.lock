@@ -1,6 +1,6 @@
 {
   "nodes": {
-    "dhclient": {
+    "dhclient_nixpkgs": {
       "locked": {
         "lastModified": 1690554897,
         "narHash": "sha256-Nda7vK+krkrmmKKArGe2sPYItSlOa9TzWKvdSHCSv/Q=",
@@ -33,7 +33,7 @@
     },
     "root": {
       "inputs": {
-        "dhclient": "dhclient",
+        "dhclient_nixpkgs": "dhclient_nixpkgs",
         "nixpkgs": "nixpkgs"
       }
     }

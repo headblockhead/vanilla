@@ -8,6 +8,7 @@
 , ffmpeg
 , dhclient
 , libnl
+, lib
 }:
 
 stdenv.mkDerivation {
@@ -53,4 +54,12 @@ stdenv.mkDerivation {
     patchelf --add-needed ../lib/libwpa_client.so ./bin/*
     wrapQtAppsHook $out
   '';
+
+  meta = with lib; {
+    description = "Vanilla";
+    homepage = "https://github.com/vanilla-wiiu/vanilla";
+    license = licenses.gpl2;
+    platforms = [ "x86_64-linux" "aarch64-linux" ];
+    mainProgram = "vanilla-gui";
+  };
 }
